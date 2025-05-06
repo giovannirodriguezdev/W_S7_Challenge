@@ -15,6 +15,28 @@ describe('Sprint 7 Challenge Learner Tests', () => {
     [5] sum('10', '3') // returns 13
   */
 
+    describe('sum function', () => {
+      it('should throw an error if no arguments are passed', () => {
+        expect(() => sum()).toThrow('pass valid numbers');
+      });
+  
+      it('should throw an error if one of the arguments is not a valid number', () => {
+        expect(() => sum(2, 'seven')).toThrow('pass valid numbers');
+      });
+  
+      it('should return the correct sum of two numbers', () => {
+        expect(sum(1, 3)).toBe(4);
+      });
+  
+      it('should return the correct sum of a number and a string', () => {
+        expect(sum('1', 2)).toBe(3);
+      });
+  
+      it('should return the correct sum of two strings', () => {
+        expect(sum('10', '3')).toBe(13);
+      });
+    });
+
   /*
   👉 TASK 2 - Integration Testing of HelloWorld component at the bottom of this module
 
@@ -29,10 +51,45 @@ describe('Sprint 7 Challenge Learner Tests', () => {
     [5] renders a text that reads "JavaScript is pretty awesome"
     [6] renders a text that includes "javaScript is pretty" (use exact = false)
   */
-  test('you can comment out this test', () => {
-    expect(true).toBe(false)
-  })
-})
+  // test('you can comment out this test', () => {
+  //   expect(true).toBe(false)
+  // })
+  describe('HelloWorld component', () => {
+    beforeEach(() => {
+      render(<HelloWorld />);
+    });
+
+    it('should render a link that reads "Home"', () => {
+      const homeLink = screen.queryByText('Home');
+      expect(homeLink).toBeInTheDocument();
+    });
+
+    it('should render a link that reads "About"', () => {
+      const aboutLink = screen.queryByText('About');
+      expect(aboutLink).toBeInTheDocument();
+    });
+
+    it('should render a link that reads "Blog"', () => {
+      const blogLink = screen.queryByText('Blog');
+      expect(blogLink).toBeInTheDocument();
+    });
+
+    it('should render a text that reads "The Truth"', () => {
+      const theTruthText = screen.queryByText('The Truth');
+      expect(theTruthText).toBeInTheDocument();
+    });
+
+    it('should render a text that reads "JavaScript is pretty awesome"', () => {
+      const jsAwesomeText = screen.queryByText('JavaScript is pretty awesome');
+      expect(jsAwesomeText).toBeInTheDocument();
+    });
+
+    it('should render a text that includes "javaScript is pretty" (exact = false)', () => {
+      const jsPrettyText = screen.queryByText('javaScript is pretty', { exact: false });
+      expect(jsPrettyText).toBeInTheDocument();
+    });
+  });
+});
 
 function sum(a, b) {
   a = Number(a)
