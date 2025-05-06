@@ -117,7 +117,7 @@ export default function Form() {
           }
 
           const message = `Thank you for your order, ${formData.fullName}! Your ${sizeText} pizza ${toppingMessage}`;
-          setOrderMessage(message);
+          setOrderMessage(message.trim());
           setOrderSuccess(true);
           setOrderFailure(false);
           setFormData({
