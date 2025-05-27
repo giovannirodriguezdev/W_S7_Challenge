@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 const validationErrors = {
   fullNameTooShort: 'Full name must be at least 3 characters',
   fullNameTooLong: 'Full name must be at most 20 characters',
-  sizeIncorrect: 'Size must be S or M or L',
+  sizeIncorrect: 'size must be S or M or L',
   toppingsRequired: 'At least one topping must be selected',
 };
 
@@ -18,8 +18,8 @@ const pizzaSchema = Yup.object().shape({
     .required('Full name is required'),
   size: Yup.string()
     .oneOf(['S', 'M', 'L'], validationErrors.sizeIncorrect)
-    .required('Size is required'),
-  toppings: Yup.array().required(validationErrors.toppingsRequired),
+    .required('size is required'),
+  toppings: Yup.array(),
 });
 
 // 👇 This array could help you construct your checkboxes using .map in the JSX.
@@ -43,6 +43,8 @@ export default function Form() {
   const [orderFailure, setOrderFailure] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [touched, setTouched] = useState({});
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   const validateForm = async (data) => {
     try {
@@ -70,11 +72,19 @@ export default function Form() {
     const { id, value } = e.target;
     console.log(`handleChange: id=${id} value=${value}`);
     setFormData({ ...formData, [id]: value });
+    setTouched((prevTouched) => ({ ...prevTouched, [id]: true }));
   };
+
+  const handleBlur = (e) => {
+    const { id } = e.target;
+    setTouched((prevTouched) => ({ ...prevTouched, [id]: true }));
+  }
 
   const handleToppingChange = (toppingId) => {
     const toppingValue = String(toppingId);
     const currentToppings = formData.toppings;
+
+    setTouched((prevTouched => ({ ...prevTouched, toppings: true})));
 
     if (currentToppings.includes(toppingValue)) {
       setFormData({
@@ -92,13 +102,14 @@ export default function Form() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true); 
+    setHasAttemptedSubmit(true);
     const currentErrors = await validateForm(formData);
     setErrors(currentErrors);
 
     if (Object.keys(currentErrors).length === 0) {
       try {
         console.log('Form submitted with values:', formData);
-        const success = Math.random() > 0.3;
+        const success = true;
         if (success) {
           const sizeText =
             formData.size === 'S'
@@ -116,7 +127,7 @@ export default function Form() {
             toppingMessage = `with ${toppingCount} toppings`;
           }
 
-          const message = `Thank you for your order, ${formData.fullName}! Your ${sizeText} pizza ${toppingMessage}`;
+          const message = `Thank you for your order, ${formData.fullName}! Your ${sizeText} pizza ${toppingMessage} is on the way.`;
           setOrderMessage(message.trim());
           setOrderSuccess(true);
           setOrderFailure(false);
@@ -125,6 +136,9 @@ export default function Form() {
             size: '',
             toppings: [],
           });
+          setErrors({});
+          setTouched({});
+          setHasAttemptedSubmit(false);
         } else {
           setOrderSuccess(false);
           setOrderFailure(true);
@@ -149,7 +163,7 @@ export default function Form() {
         setOrderSuccess(false);
         setOrderFailure(false);
         setOrderMessage('');
-      }, 3000);
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, [orderSuccess, orderFailure]);
@@ -170,9 +184,10 @@ export default function Form() {
             type="text"
             value={formData.fullName}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
         </div>
-        {errors.fullName && <div className="error">{errors.fullName}</div>}
+        { (hasAttemptedSubmit || touched.fullName) && errors.fullName && <div className='error'>{errors.fullName}</div>}
       </div>
 
       <div className="input-group">
@@ -186,7 +201,7 @@ export default function Form() {
             <option value="L">Large</option>
           </select>
         </div>
-        {errors.size && <div className="error">{errors.size}</div>}
+        {(hasAttemptedSubmit || touched.size) && errors.size && <div className="error">{errors.size}</div>}
       </div>
 
       <div className="input-group">
@@ -204,7 +219,7 @@ export default function Form() {
             <br />
           </label>
         ))}
-        {errors.toppings && <div className="error">{errors.toppings}</div>}
+        {(hasAttemptedSubmit || touched.topping) && errors.toppings && <div className="error">{errors.toppings}</div>}
       </div>
       {/* 👇 Make sure the submit stays disabled until the form validates! */}
       <input type="submit" disabled={isSubmitDisabled || isSubmitting} />
